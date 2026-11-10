@@ -40,6 +40,9 @@ button[aria-pressed="true"]{background:#D4AF37;border-color:#D4AF37;color:#0B0B0
 .note{margin:0;font-size:13px;color:#8F897E}
 .fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:40px;text-align:center;color:#B8B2A7}
 @media (max-width:900px){.wrap{grid-template-columns:1fr}.stage{position:relative;height:62vh;min-height:420px}.panel{border-left:0;border-top:1px solid rgba(212,175,55,.22);padding:32px 22px}}
+body.embed .brand{display:none}
+body.embed .stage{height:100vh;min-height:0}
+@media (max-width:900px){body.embed .stage{position:relative;height:620px}}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
@@ -313,6 +316,8 @@ controls.minDistance = 46; controls.maxDistance = 170;
 controls.minPolarAngle = Math.PI * 0.32; controls.maxPolarAngle = Math.PI * 0.6;
 controls.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 controls.autoRotateSpeed = 1.1;
+const EMBED = new URLSearchParams(location.search).has('embed');
+if (EMBED) { document.body.classList.add('embed'); controls.enableZoom = false; document.querySelector('.hint').textContent = 'Drag to rotate'; }
 
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
