@@ -5,63 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prestige Chains</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500&display=swap">
-<style>
-body{margin:0;background:#0B0B0C}
-a{color:#F5F2EA}a:hover{color:#D4AF37}
-@keyframes pc-spin{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
-@keyframes pc-spin-rev{from{transform:rotateY(360deg)}to{transform:rotateY(0deg)}}
-.pc-link{position:absolute;left:50%;top:50%;width:58px;height:30px;margin:-15px 0 0 -29px;box-sizing:border-box;border:6px solid;border-color:#F6E3A1 #C9A24A #8C6B1F #E3C365;border-radius:15px}
-.pc-link-sm{position:absolute;left:50%;top:50%;width:34px;height:18px;margin:-9px 0 0 -17px;box-sizing:border-box;border:4px solid;border-color:#F6E3A1 #C9A24A #8C6B1F #E3C365;border-radius:9px}
-.pc-mosaic{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(3,1fr);gap:10px;height:810px}
-.pc-tile{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#121214;color:#F5F2EA;font-size:11px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none}
-@keyframes pc-drift{from{transform:scale(1.1) translate(-1.6%,1.6%)}to{transform:scale(1.1) translate(1.6%,-1.6%)}}
-@keyframes pc-sheen{0%{background-position:120% 0}60%,100%{background-position:-20% 0}}
-@keyframes pc-kb{from{transform:scale(1)}to{transform:scale(1.14)}}
-.pc-tile img{transition:transform .9s ease}
-a.pc-tile:hover img{transform:scale(1.05)}
-.pc-m-c{grid-column:2;grid-row:1/4}.pc-m-l1{grid-column:1;grid-row:1/3}.pc-m-l2{grid-column:1;grid-row:3}.pc-m-r1{grid-column:3;grid-row:1}.pc-m-r2{grid-column:3;grid-row:2/4}
-.pc-m-c .pc-link,.pc-m-c .pc-link-sm{border-color:#E6C760 #B8892B #7A5A14 #D1A942}
-@media (max-width:1080px){.pc-mosaic{grid-template-columns:1fr 1fr;grid-template-rows:auto;height:auto}.pc-m-c{grid-column:1/3;grid-row:auto;height:440px}.pc-m-l1,.pc-m-l2,.pc-m-r1,.pc-m-r2{grid-column:auto;grid-row:auto;height:240px}}
-.pc-panel{position:sticky;top:min(0px,calc(100vh - 860px));height:860px;box-sizing:border-box}
-.pc-bg-a{background:#0B0B0C;box-shadow:0 0 0 100vmax #0B0B0C;clip-path:inset(0 -100vmax)}
-.pc-bg-b{background:#151517;box-shadow:0 0 0 100vmax #151517;clip-path:inset(0 -100vmax)}
-.pc-cover{position:relative}
-@keyframes pc-rise{from{opacity:0;translate:0 56px}to{opacity:1;translate:0 0}}
-@keyframes pc-scrolltilt{from{transform:rotateX(-24deg) rotateZ(-14deg) scale(1)}to{transform:rotateX(-62deg) rotateZ(8deg) scale(1.35)}}
-@supports (animation-timeline: view()){
-.pc-panel:not(#top) :is(h1,h2,h3,p,.pc-tilt){animation:pc-rise linear both;animation-timeline:view();animation-range:entry 0% cover 18%}
-.pc-scrolltilt{animation:pc-scrolltilt linear both;animation-timeline:scroll(root);animation-range:300px 1500px}
-}
-@media (max-width:1080px){.pc-panel{position:relative;top:auto;height:auto;padding-top:72px !important;padding-bottom:72px !important}}
-@media (prefers-reduced-motion: reduce){.pc-motion,.pc-scrolltilt,.pc-panel :is(h2,h3,p,.pc-tilt){animation:none !important}.pc-tilt:hover{transform:none}}
-@media (min-width:1081px){.pc-mosaic{height:min(810px,calc(100vh - 100px));min-height:520px}}
-.pc-try{height:860px;padding-top:84px !important;box-sizing:border-box}
-@media (max-width:1080px){.pc-try{height:1500px !important;padding:0 !important}}
-@media (max-width:900px){.pc-try{height:1560px !important}}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<div style="background: #0B0B0C; color: #F5F2EA; font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.7; overflow-x: clip">
-
-<header class="pc-bg-a" style="position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; max-width: 1360px; margin: 0 auto; padding: 14px 40px; box-sizing: border-box; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase">
-<nav aria-label="Main" style="flex: 1 1 240px; display: flex; flex-wrap: wrap; gap: 36px">
-<a href="#chains" style="text-decoration: none; padding: 12px 0">Chains</a>
-<a href="#bracelets" style="text-decoration: none; padding: 12px 0">Bracelets</a>
-<a href="#try-on" style="text-decoration: none; padding: 12px 0">Try-On</a>
-<a href="#gold" style="text-decoration: none; padding: 12px 0">Our Gold</a>
+<header class="pc-header">
+<button type="button" class="pc-menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"></path></svg>
+<span>Menu</span>
+</button>
+<nav class="pc-quick" aria-label="Collections">
+<a href="chains.html">Chains</a>
+<a href="bracelets.html">Bracelets</a>
 </nav>
-<a href="#top" style="font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; letter-spacing: 0.32em; text-decoration: none; padding: 8px 0">PRESTIGE</a>
-<div style="flex: 1 1 240px; display: flex; justify-content: flex-end; gap: 36px">
-<a href="#care" style="text-decoration: none; padding: 12px 0">Care</a>
-<a href="#chains" style="text-decoration: none; padding: 12px 0">Bag (0)</a>
+<a class="pc-logo" href="index.html" aria-label="Prestige, home">PRESTIGE</a>
+<div class="pc-right">
+<a href="index.html#try-on">360° Try-On</a>
+<a href="#" aria-label="Bag, 0 items">Bag (0)</a>
 </div>
 </header>
 
+<div class="pc-menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+<div class="pc-menu-inner">
+<button type="button" class="pc-menu-close" id="menu-close" aria-label="Close menu">
+<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+</button>
+<div class="pc-menu-grid">
+<div class="pc-menu-main">
+<nav aria-label="Main">
+<ul class="pc-menu-big">
+<li><a href="index.html" aria-current="page">Home</a></li>
+<li><a href="chains.html">Chains</a></li>
+<li><a href="bracelets.html">Bracelets</a></li>
+<li><a href="index.html#try-on">360° Try-On</a></li>
+<li><a href="index.html#gold">Our Gold</a></li>
+</ul>
+</nav>
+<ul class="pc-menu-util">
+<li><a href="#"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>Bag</a></li>
+<li><a href="index.html#gold"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z"></path></svg>Warranty &amp; care</a></li>
+<li><span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>[SUPPORT EMAIL]</span></li>
+<li><span><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"></path></svg>United States / English</span></li>
+</ul>
+</div>
+<div class="pc-menu-side">
+<p class="pc-menu-head">Chains</p>
+<ul>
+<li><a href="chains.html">All chains</a></li>
+<li><a href="chains.html#cuban">Cuban</a></li>
+<li><a href="chains.html#figaro">Figaro</a></li>
+<li><a href="chains.html#curb">Curb</a></li>
+<li><a href="chains.html#rose-herringbone">Rose Herringbone</a></li>
+<li><a href="chains.html#flat-mesh">Flat Mesh</a></li>
+<li><a href="chains.html#mesh">Mesh</a></li>
+<li><a href="chains.html#bismark">Bismark</a></li>
+<li><a href="chains.html#round-snake">Round Snake</a></li>
+<li><a href="chains.html#serpentine">Serpentine</a></li>
+<li><a href="chains.html#rectangle">Rectangle Link</a></li>
+<li><a href="chains.html#clip">Clip Link</a></li>
+</ul>
+<p class="pc-menu-head">Bracelets</p>
+<ul>
+<li><a href="bracelets.html">All bracelets</a></li>
+<li><a href="bracelets.html#cuban">Cuban</a></li>
+<li><a href="bracelets.html#figaro">Figaro</a></li>
+<li><a href="bracelets.html#franco">Franco</a></li>
+<li><a href="bracelets.html#flat-mesh">Flat Mesh</a></li>
+<li><a href="bracelets.html#bismark">Bismark</a></li>
+<li><a href="bracelets.html#interlocked">Interlocked</a></li>
+<li><a href="bracelets.html#block">Block</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<main class="pc-home">
 <section id="top" class="pc-panel pc-bg-a" style="max-width: 1360px; margin: 0 auto; padding: 20px 40px 0">
 <div class="pc-mosaic">
-<a href="#chains" class="pc-tile pc-m-l1"><img src="img/cuban-model.jpg" alt="Man wearing two gold plated Cuban chains" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Cuban</span></a>
-<a href="#chains" class="pc-tile pc-m-l2"><img src="img/figaro-macro.jpg" alt="Close-up of gold plated Figaro chains with lobster clasps" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Figaro</span></a>
+<a href="chains.html#cuban" class="pc-tile pc-m-l1"><img src="img/cuban-model.jpg" alt="Man wearing two gold plated Cuban chains" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Cuban</span></a>
+<a href="chains.html#figaro" class="pc-tile pc-m-l2"><img src="img/figaro-macro.jpg" alt="Close-up of gold plated Figaro chains with lobster clasps" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Figaro</span></a>
 <div class="pc-tile pc-m-c">
 <img class="pc-motion pc-kb" src="img/cuban-layered.jpg" alt="Three gold plated Cuban chains layered over a black T-shirt" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: pc-kb 14s ease-in-out infinite alternate">
 <button type="button" id="pause" aria-label="Pause" style="position: absolute; right: 14px; bottom: 14px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(11,11,12,.5); border: 0; border-radius: 50%; cursor: pointer; color: #F5F2EA">
@@ -69,11 +91,10 @@ a.pc-tile:hover img{transform:scale(1.05)}
 <svg id="ic-play" hidden aria-hidden="true" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor"><path d="M7 5l12 7-12 7z"></path></svg>
 </button>
 </div>
-<a href="#chains" class="pc-tile pc-m-r1"><img src="img/rose-macro.jpg" alt="Close-up of a rose gold plated herringbone chain" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Rose Herringbone</span></a>
-<a href="#chains" class="pc-tile pc-m-r2"><img src="img/curb-model.jpg" alt="Man wearing a gold plated curb chain" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Curb</span></a>
+<a href="chains.html#rose-herringbone" class="pc-tile pc-m-r1"><img src="img/rose-macro.jpg" alt="Close-up of a rose gold plated herringbone chain" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Rose Herringbone</span></a>
+<a href="chains.html#curb" class="pc-tile pc-m-r2"><img src="img/curb-model.jpg" alt="Man wearing a gold plated curb chain" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 14px; bottom: 12px; padding: 4px 12px; background: rgba(11,11,12,.62); font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0; text-transform: none; color: #F5F2EA">Curb</span></a>
 </div>
 </section>
-
 <section class="pc-panel" style="overflow: hidden; background: #050505; display: flex; align-items: flex-start">
 <img class="pc-motion" src="img/macro-banner.jpg" alt="Close-up of a gold plated chain on black suede" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: pc-drift 18s ease-in-out infinite alternate">
 <div aria-hidden="true" class="pc-motion" style="position: absolute; inset: 0; mix-blend-mode: overlay; background: linear-gradient(115deg, rgba(255,236,170,0) 42%, rgba(255,236,170,.6) 50%, rgba(255,236,170,0) 58%); background-size: 300% 100%; animation: pc-sheen 7s ease-in-out infinite"></div>
@@ -81,53 +102,34 @@ a.pc-tile:hover img{transform:scale(1.05)}
 <div style="position: relative; width: 100%; max-width: 1360px; margin: 0 auto; padding: 110px 40px 0; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 26px">
 <p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: #D4AF37">Gold plated chains and bracelets for men</p>
 <h1 style="margin: 0; max-width: 560px; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(44px, 5.4vw, 80px); line-height: 1.04">Made to be seen from <em style="font-style: italic; color: #E9CC6E">every angle</em></h1>
-<a href="#chains" style="margin-top: 8px; padding: 14px 0 10px; border-bottom: 1px solid #D4AF37; text-decoration: none; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase">Discover the collection</a>
+<div class="pc-cta-row"><a class="pc-textlink" href="chains.html">Shop chains</a><a class="pc-textlink" href="bracelets.html">Shop bracelets</a></div>
 </div>
 </section>
+<section class="pc-panel pc-bg-b pc-cats" aria-label="Shop by category">
+<a class="pc-cat" href="chains.html">
+<img src="img/cuban-trio.jpg" alt="Gold plated Cuban chains on black suede">
+<span class="pc-cat-shade" aria-hidden="true"></span>
+<span class="pc-cat-text"><span class="pc-eyebrow">11 styles</span><span class="pc-h2"><em style="font-style: italic; color: #E9CC6E">Chains</em></span><span class="pc-textlink">Explore</span></span>
+</a>
+<a class="pc-cat" href="bracelets.html">
+<img src="img/bracelet-franco.jpg" alt="Gold plated Franco bracelet on black suede">
+<span class="pc-cat-shade" aria-hidden="true"></span>
+<span class="pc-cat-text"><span class="pc-eyebrow">7 styles</span><span class="pc-h2"><em style="font-style: italic; color: #E9CC6E">Bracelets</em></span><span class="pc-textlink">Explore</span></span>
+</a>
+</section>
 
-<section style="display: contents">
-<article id="chains" class="pc-panel pc-bg-a" style="display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 72px; max-width: 1360px; margin: 0 auto; padding: 0 40px">
+<article id="featured" class="pc-panel pc-bg-a" style="display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 72px; max-width: 1360px; margin: 0 auto; padding: 0 40px">
 <div class="pc-tilt" style="flex: 1.3 1 480px; min-width: 0; height: 580px; overflow: hidden; background: #0E0E10"><img src="img/cuban-trio.jpg" alt="Three gold plated Cuban chains in different widths on black suede" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>
 <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 24px">
-<p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; color: #D4AF37">01</p>
+<p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: #D4AF37">Signature</p>
 <h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(40px, 4.4vw, 64px); line-height: 1.04">The <em style="font-style: italic; color: #E9CC6E">Cuban</em> Link</h3>
 <p style="margin: 0; max-width: 440px; color: #B8B2A7">[ONE-LINE DESCRIPTION]. 3, 4, 6 and 9 mm, [LENGTHS] in, [KARAT]K gold plated. From [PRICE].</p>
-<a href="#try-on" style="padding: 14px 0 10px; border-bottom: 1px solid #D4AF37; text-decoration: none; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase">Discover</a>
+<div class="pc-cta-row"><a class="pc-textlink" href="chains.html#cuban">Discover</a><a class="pc-textlink" href="#try-on">Try it in 360°</a></div>
 </div>
 </article>
-<article class="pc-panel pc-bg-b" style="display: flex; flex-wrap: wrap; flex-direction: row-reverse; align-items: center; align-content: center; gap: 72px; max-width: 1360px; margin: 0 auto; padding: 0 40px">
-<div class="pc-tilt" style="flex: 1.3 1 480px; min-width: 0; height: 580px; overflow: hidden; background: #0E0E10"><img src="img/figaro-model.jpg" alt="Man wearing a gold plated Figaro chain over a black T-shirt" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>
-<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 24px">
-<p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; color: #D4AF37">02</p>
-<h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(40px, 4.4vw, 64px); line-height: 1.04">The <em style="font-style: italic; color: #E9CC6E">Figaro</em></h3>
-<p style="margin: 0; max-width: 440px; color: #B8B2A7">[ONE-LINE DESCRIPTION]. 3, 6 and 8 mm, [LENGTHS] in, [KARAT]K gold plated. From [PRICE].</p>
-<a href="#try-on" style="padding: 14px 0 10px; border-bottom: 1px solid #D4AF37; text-decoration: none; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase">Discover</a>
-</div>
-</article>
-<article class="pc-panel pc-bg-a" style="display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 72px; max-width: 1360px; margin: 0 auto; padding: 0 40px">
-<div class="pc-tilt" style="flex: 1.3 1 480px; min-width: 0; height: 580px; overflow: hidden; background: #0E0E10"><img src="img/rose-suede.jpg" alt="Rose gold plated herringbone chain on black suede" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>
-<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 24px">
-<p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; color: #D4AF37">03</p>
-<h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(40px, 4.4vw, 64px); line-height: 1.04">The Rose <em style="font-style: italic; color: #E9CC6E">Herringbone</em></h3>
-<p style="margin: 0; max-width: 440px; color: #B8B2A7">[ONE-LINE DESCRIPTION]. [WIDTH] mm, [LENGTHS] in, [KARAT]K gold plated. From [PRICE].</p>
-<a href="#try-on" style="padding: 14px 0 10px; border-bottom: 1px solid #D4AF37; text-decoration: none; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase">Discover</a>
-</div>
-</article>
-<article id="bracelets" class="pc-panel pc-bg-b" style="display: flex; flex-wrap: wrap; flex-direction: row-reverse; align-items: center; align-content: center; gap: 72px; max-width: 1360px; margin: 0 auto; padding: 0 40px">
-<div class="pc-tilt" style="flex: 1.3 1 480px; min-width: 0; height: 580px; overflow: hidden; background: #0E0E10"><img src="img/bracelet-franco.jpg" alt="Gold plated Franco bracelet on black suede" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>
-<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 24px">
-<p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; color: #D4AF37">04</p>
-<h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(40px, 4.4vw, 64px); line-height: 1.04">The <em style="font-style: italic; color: #E9CC6E">Bracelets</em></h3>
-<p style="margin: 0; max-width: 440px; color: #B8B2A7">Franco, Cuban, Figaro and block links to match your chain. [KARAT]K gold plated. From [PRICE].</p>
-<a href="#bracelets" style="padding: 14px 0 10px; border-bottom: 1px solid #D4AF37; text-decoration: none; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase">Discover</a>
-</div>
-</article>
-</section>
-
 <section id="try-on" class="pc-panel pc-bg-a pc-try" style="display: flex; align-items: stretch; padding: 0">
 <iframe src="try-on.html?embed=1" title="360 degree chain try-on" loading="lazy" style="display: block; width: 100%; height: 100%; border: 0; background: #0B0B0C"></iframe>
 </section>
-
 <section id="gold" class="pc-cover pc-bg-a" style="max-width: 1360px; margin: 0 auto; padding: 160px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 72px">
 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px">
 <p style="margin: 0; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: #D4AF37">Our gold</p>
@@ -148,39 +150,38 @@ a.pc-tile:hover img{transform:scale(1.05)}
 </div>
 </div>
 </section>
-
-<section class="pc-cover" style="background: #151517">
-<div style="max-width: 720px; margin: 0 auto; padding: 120px 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px">
-<h2 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: clamp(34px, 3.6vw, 52px); line-height: 1.12">Receive the <em style="font-style: italic; color: #E9CC6E">latest</em></h2>
-<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 20px; width: 100%">
-<div style="flex: 1 1 280px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px">
-<label for="nl-email" style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B8B2A7">Email</label>
-<input id="nl-email" type="email" autocomplete="email" style="width: 100%; min-height: 48px; box-sizing: border-box; padding: 0 4px; background: transparent; color: #F5F2EA; border: 0; border-bottom: 1px solid rgba(245,242,234,.45); font-family: Inter, system-ui, sans-serif; font-size: 16px">
+<section class="pc-news">
+<div class="pc-wrap pc-news-inner">
+<h2 class="pc-h2">Receive the <em style="font-style: italic; color: #E9CC6E">latest</em></h2>
+<form class="pc-news-form" onsubmit="event.preventDefault()">
+<div class="pc-field">
+<label for="nl-email">Email</label>
+<input id="nl-email" type="email" autocomplete="email">
 </div>
-<button type="button" style="min-height: 48px; padding: 0 4px; background: transparent; color: #F5F2EA; border: 0; border-bottom: 1px solid #D4AF37; font-family: Inter, system-ui, sans-serif; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; cursor: pointer">Subscribe</button>
-</div>
+<button type="submit" class="pc-textlink">Subscribe</button>
+</form>
 </div>
 </section>
-
-<footer class="pc-cover pc-bg-a">
-<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; max-width: 1360px; margin: 0 auto; padding: 56px 40px; box-sizing: border-box; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #B8B2A7">
-<span style="font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: 0.32em; color: #F5F2EA">PRESTIGE</span>
-<nav aria-label="Footer" style="display: flex; flex-wrap: wrap; gap: 36px">
-<a href="#chains" style="text-decoration: none; padding: 12px 0">Shop</a>
-<a href="#gold" style="text-decoration: none; padding: 12px 0">Warranty</a>
-<a href="#care" style="text-decoration: none; padding: 12px 0">Care</a>
-<a href="#top" style="text-decoration: none; padding: 12px 0">Shipping &amp; returns</a>
+</main>
+<script>
+(function(){
+var hero=document.querySelector('.pc-kb'),pb=document.getElementById('pause'),ip=document.getElementById('ic-pause'),iy=document.getElementById('ic-play'),paused=false;
+if(pb)pb.addEventListener('click',function(){paused=!paused;hero.style.animationPlayState=paused?'paused':'running';ip.hidden=paused;iy.hidden=!paused;pb.setAttribute('aria-label',paused?'Play':'Pause');});
+})();
+</script>
+<footer class="pc-footer">
+<div class="pc-wrap pc-footer-row">
+<a class="pc-logo" href="index.html">PRESTIGE</a>
+<nav aria-label="Footer">
+<a href="chains.html">Chains</a>
+<a href="bracelets.html">Bracelets</a>
+<a href="index.html#try-on">360° Try-On</a>
+<a href="index.html#gold">Warranty</a>
+<a href="index.html#gold">Shipping &amp; returns</a>
 </nav>
 <span>[SUPPORT EMAIL]</span>
 </div>
 </footer>
-
-</div>
-<script>
-(function(){
-var hero=document.querySelector('.pc-kb'),pb=document.getElementById('pause'),ip=document.getElementById('ic-pause'),iy=document.getElementById('ic-play'),paused=false;
-pb.addEventListener('click',function(){paused=!paused;hero.style.animationPlayState=paused?'paused':'running';ip.hidden=paused;iy.hidden=!paused;pb.setAttribute('aria-label',paused?'Play':'Pause');});
-})();
-</script>
+<script src="assets/site.js"></script>
 </body>
 </html>
