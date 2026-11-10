@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prestige Chains — 360° Try-On</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#0B0B0C;color:#F5F2EA;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.6}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 400px;min-height:100vh}
+.stage{position:sticky;top:0;height:100vh;min-height:560px;background:radial-gradient(circle at 50% 42%,#1d1b17 0%,#0B0B0C 62%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.brand{position:absolute;left:32px;top:26px;font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.32em}
+.hint{position:absolute;left:32px;bottom:24px;margin:0;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#B8B2A7}
+.spin{position:absolute;right:24px;bottom:16px}
+.panel{display:flex;flex-direction:column;gap:26px;padding:44px 36px;background:#121214;border-left:1px solid rgba(212,175,55,.22)}
+.eyebrow{margin:0;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#D4AF37}
+h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:44px;line-height:1.05}
+h1 em{color:#E9CC6E}
+.lead{margin:0;color:#B8B2A7}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+legend{padding:0;margin-bottom:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#B8B2A7}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+button{font:inherit;color:#F5F2EA;background:transparent;border:1px solid rgba(245,242,234,.35);min-height:44px;padding:0 18px;cursor:pointer;letter-spacing:.06em}
+button:hover{border-color:#D4AF37}
+button:focus-visible{outline:2px solid #E9CC6E;outline-offset:2px}
+button[aria-pressed="true"]{background:#D4AF37;border-color:#D4AF37;color:#0B0B0C}
+.add{background:#D4AF37;border-color:#D4AF37;color:#0B0B0C;font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;min-height:52px}
+.add:disabled{opacity:.4;cursor:not-allowed}
+.worn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.worn li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(212,175,55,.22)}
+.worn li:last-child{border-bottom:1px solid rgba(212,175,55,.22)}
+.worn button{border:0;min-height:44px;padding:0 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#B8B2A7}
+.worn button:hover{color:#E9CC6E}
+.empty{margin:0;color:#B8B2A7}
+.note{margin:0;font-size:13px;color:#8F897E}
+.fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:40px;text-align:center;color:#B8B2A7}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}.stage{position:relative;height:62vh;min-height:420px}.panel{border-left:0;border-top:1px solid rgba(212,175,55,.22);padding:32px 22px}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<main class="wrap">
+  <section class="stage" id="stage" aria-label="3D bust">
+    <canvas id="view" role="img" aria-label="Rotating 3D bust wearing the selected gold chains"></canvas>
+    <a class="brand" href="index.html" style="color:#F5F2EA;text-decoration:none">PRESTIGE</a>
+    <p class="hint">Drag to rotate · scroll to zoom</p>
+    <button type="button" class="spin" id="spin" aria-pressed="false">Pause rotation</button>
+    <p class="fail" id="fail">This browser could not start the 3D view. Turn on hardware acceleration or try another browser.</p>
+  </section>
+  <aside class="panel">
+    <p class="eyebrow">360° try-on</p>
+    <h1>See the <em>drop</em> before you buy</h1>
+    <p class="lead">Pick a link, a width and a length, then add it to the bust. Stack up to three chains and turn them in any direction.</p>
+    <fieldset><legend>Link</legend><div class="opts" id="o-style"></div></fieldset>
+    <fieldset><legend>Width</legend><div class="opts" id="o-width"></div></fieldset>
+    <fieldset><legend>Length</legend><div class="opts" id="o-length"></div></fieldset>
+    <button type="button" class="add" id="add">Add chain</button>
+    <div>
+      <p class="eyebrow" style="margin-bottom:12px">On the bust</p>
+      <ul class="worn" id="worn"></ul>
+      <p class="empty" id="empty" hidden>No chains yet.</p>
+    </div>
+    <p class="note" id="note"></p>
+  </aside>
+</main>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ---------- Bust: lofted cross-sections, units = centimetres ---------- */
+// [height, half-width, half-depth, forward offset, squareness]
+const KEYS = [
+  [0.0, 16.5, 10.4, 0.6, 2.5],
+  [6.0, 18.6, 11.6, 1.0, 2.5],
+  [12.0, 20.6, 11.9, 1.0, 2.6],
+  [17.0, 21.6, 10.9, 0.4, 2.7],
+  [20.4, 20.2, 9.0, -0.2, 2.6],
+  [22.8, 13.6, 7.7, -0.4, 2.3],
+  [24.6, 7.4, 6.7, -0.3, 2.1],
+  [26.6, 6.1, 6.2, 0.0, 2.0],
+  [30.4, 5.8, 6.0, 0.3, 2.0],
+  [36.0, 5.8, 6.0, 0.5, 2.0],
+  [44.0, 5.8, 6.0, 0.5, 2.0]
+];
+// head: an ellipsoid blended onto the neck
+const HEAD = { y: 43.4, h: 9.6, rx: 7.5, rz: 9.3, zo: 1.3 };
+const TOP = HEAD.y + HEAD.h;
+const sstep = (a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
+function cr(p0, p1, p2, p3, t) {
+  const t2 = t * t, t3 = t2 * t;
+  return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+}
+function section(y) {
+  y = Math.min(Math.max(y, 0), TOP);
+  const yk = Math.min(y, KEYS[KEYS.length - 1][0]);
+  let i = 0;
+  while (i < KEYS.length - 2 && yk > KEYS[i + 1][0]) i++;
+  const a = KEYS[Math.max(i - 1, 0)], b = KEYS[i], c = KEYS[i + 1], d = KEYS[Math.min(i + 2, KEYS.length - 1)];
+  const t = (yk - b[0]) / (c[0] - b[0]);
+  const lo = (k) => Math.min(b[k], c[k]), hi = (k) => Math.max(b[k], c[k]);
+  const v = (k) => Math.min(Math.max(cr(a[k], b[k], c[k], d[k], t), lo(k) - 0.6), hi(k) + 0.6);
+  const fade = 1 - sstep(36, 43, y);                       // neck ends inside the head
+  const e = (y - HEAD.y) / HEAD.h, f = Math.abs(e) < 1 ? Math.sqrt(1 - e * e) : 0;
+  const mix = (n, h) => Math.pow(Math.pow(Math.max(n * fade, 0), 5) + Math.pow(h * f, 5), 0.2);
+  const w = sstep(31.5, 37, y);
+  return { rx: Math.max(mix(v(1), HEAD.rx), 0.04), rz: Math.max(mix(v(2), HEAD.rz), 0.05), zo: v(3) * (1 - w) + HEAD.zo * w, n: v(4) };
+}
+function surface(y, phi) {
+  const s = section(y), c = Math.cos(phi), sn = Math.sin(phi);
+  const r = 1 / Math.pow(Math.pow(Math.abs(c) / s.rx, s.n) + Math.pow(Math.abs(sn) / s.rz, s.n), 1 / s.n);
+  return [r * c, y, s.zo + r * sn];
+}
+function bustGeometry() {
+  const NY = 150, NS = 112, pos = [], idx = [];
+  for (let j = 0; j <= NY; j++) {
+    const y = TOP * Math.pow(j / NY, 0.92);
+    for (let i = 0; i < NS; i++) pos.push(...surface(y, (i / NS) * Math.PI * 2));
+  }
+  for (let j = 0; j < NY; j++) for (let i = 0; i < NS; i++) {
+    const a = j * NS + i, b = j * NS + (i + 1) % NS, c = a + NS, d = b + NS;
+    idx.push(a, c, b, b, c, d);
+  }
+  const base = pos.length / 3;
+  pos.push(0, 0, section(0).zo);
+  for (let i = 0; i < NS; i++) idx.push(base, i, (i + 1) % NS);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+/* ---------- Chain path: rests on the bust, drop solved from real length ---------- */
+const Y_SIDE = 26.0;
+function restZ(x, y, side, off) {
+  const s = section(y), u = Math.min(Math.abs(x) / s.rx, 0.999);
+  return s.zo + side * (s.rz * Math.pow(1 - Math.pow(u, s.n), 1 / s.n) + off);
+}
+function pathPoints(drop, off) {
+  const W = section(Y_SIDE).rx + off, pts = [], N = 260;
+  for (let i = 0; i < N; i++) {            // behind the neck, right to left
+    const a = (i / N) * Math.PI, x = W * Math.cos(a), y = Y_SIDE + 0.7 * Math.sin(a);
+    pts.push(new THREE.Vector3(x, y, restZ(x, y, -1, off)));
+  }
+  for (let i = 0; i < N; i++) {            // down the chest, left to right
+    const a = (i / N) * Math.PI, x = -W * Math.cos(a), y = Y_SIDE - drop * Math.sin(a);
+    pts.push(new THREE.Vector3(x, y, restZ(x, y, 1, off)));
+  }
+  return pts;
+}
+function loopLength(pts) {
+  let L = 0;
+  for (let i = 0; i < pts.length; i++) L += pts[i].distanceTo(pts[(i + 1) % pts.length]);
+  return L;
+}
+function solvePath(lengthCm, off) {
+  let lo = 0.5, hi = 24.5;
+  for (let k = 0; k < 30; k++) {
+    const mid = (lo + hi) / 2;
+    if (loopLength(pathPoints(mid, off)) < lengthCm) lo = mid; else hi = mid;
+  }
+  const drop = (lo + hi) / 2;
+  return { pts: pathPoints(drop, off), drop };
+}
+
+/* ---------- Links: twisted curb links with diamond-cut flats ---------- */
+const STYLES = {
+  cuban: { label: 'Cuban', widths: [4, 6, 9], pattern: [0] },
+  figaro: { label: 'Figaro', widths: [3, 6, 8], pattern: [0, 0, 0, 1] }
+};
+const LENGTHS = [18, 20, 22, 24];
+const WIRE = 0.30;                                   // wire thickness, in chain widths
+const KINDS = [{ len: 1.46 }, { len: 3.0 }];          // short link, long Figaro link
+function linkGeometry(len) {
+  const NP = 56, NC = 16, rw = WIRE / 2, rh = 0.175, cut = 0.2, twist = Math.PI / 4, m = 2.7;
+  const ax = len / 2 - rw, ay = 0.5 - rw;
+  const centre = (th) => {
+    const c = Math.cos(th), sn = Math.sin(th);
+    return [ax * Math.sign(c) * Math.pow(Math.abs(c), 2 / m), ay * Math.sign(sn) * Math.pow(Math.abs(sn), 2 / m)];
+  };
+  const pos = [], nor = [], idx = [];
+  for (let i = 0; i < NP; i++) {
+    const th = (i / NP) * Math.PI * 2, [cx, cy] = centre(th);
+    const [x1, y1] = centre(th + 0.01), [x0, y0] = centre(th - 0.01);
+    let tx = x1 - x0, ty = y1 - y0; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    const nx = ty, ny = -tx;                                   // outward, in the link plane
+    const ph = twist * (cx / ax), cp = Math.cos(ph), sp = Math.sin(ph);
+    for (let j = 0; j < NC; j++) {
+      const al = (j / NC) * Math.PI * 2, ca = Math.cos(al), sa = Math.sin(al);
+      const px = cx + nx * ca * rw, py = cy + ny * ca * rw, pz = sa * rh;
+      let qy = py * cp - pz * sp, qz = py * sp + pz * cp;      // twist about the long axis
+      let vx = nx * ca / rw, vy = ny * ca / rw, vz = sa / rh;
+      let wy = vy * cp - vz * sp, wz = vy * sp + vz * cp;
+      if (Math.abs(qz) > cut) { qz = Math.sign(qz) * cut; vx = 0; wy = 0; wz = Math.sign(qz); }   // diamond-cut flat
+      const nl = Math.hypot(vx, wy, wz) || 1;
+      pos.push(px, qy, qz); nor.push(vx / nl, wy / nl, wz / nl);
+    }
+  }
+  for (let i = 0; i < NP; i++) for (let j = 0; j < NC; j++) {
+    const a = i * NC + j, b = ((i + 1) % NP) * NC + j, c = i * NC + (j + 1) % NC, d = ((i + 1) % NP) * NC + (j + 1) % NC;
+    idx.push(a, b, c, c, b, d);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setIndex(idx);
+  return g;
+}
+const linkGeos = KINDS.map((k) => linkGeometry(k.len));
+const gold = new THREE.MeshStandardMaterial({ color: 0xffd58a, metalness: 1, roughness: 0.13, envMapIntensity: 2.1 });
+
+function buildChain(spec, slot) {
+  const w = spec.width / 10;                         // cm
+  const off = w * 0.24 + slot * 0.1;
+  const { pts, drop } = solvePath(spec.length * 2.54, off);
+  const total = loopLength(pts);
+  const pattern = STYLES[spec.style].pattern;
+  const inner = (k) => (KINDS[k].len - 2 * WIRE) * w;      // opening of a link
+  const seq = [];
+  let s = 0, i = 0;
+  while (s < total) {
+    const k = pattern[i % pattern.length], kn = pattern[(i + 1) % pattern.length];
+    seq.push({ s, k });
+    s += 0.5 * (inner(k) + inner(kn)) * 0.72;              // neighbours sit inside each other's opening
+    i++;
+  }
+  const fit = total / s;                                    // close the loop evenly
+  const cum = [0];
+  for (let j = 0; j < pts.length; j++) cum.push(cum[j] + pts[j].distanceTo(pts[(j + 1) % pts.length]));
+  const at = (dist) => {
+    dist = ((dist % total) + total) % total;
+    let lo = 0, hi = pts.length;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (cum[mid] <= dist) lo = mid; else hi = mid; }
+    const t = (dist - cum[lo]) / (cum[lo + 1] - cum[lo] || 1);
+    return pts[lo].clone().lerp(pts[(lo + 1) % pts.length], t);
+  };
+  const group = new THREE.Group();
+  const m4 = new THREE.Matrix4(), sc = new THREE.Matrix4().makeScale(w, w, w);
+  const T = new THREE.Vector3(), N = new THREE.Vector3(), B = new THREE.Vector3();
+  KINDS.forEach((kind, k) => {
+    const mine = seq.filter((l) => l.k === k);
+    if (!mine.length) return;
+    const mesh = new THREE.InstancedMesh(linkGeos[k], gold, mine.length);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    mine.forEach((l, n) => {
+      const d = l.s * fit, p = at(d), span = Math.max(0.05, KINDS[k].len * w * 0.3);
+      T.copy(at(d + span)).sub(at(d - span)).normalize();
+      const sec = section(p.y);
+      N.set(p.x / (sec.rx * sec.rx), 0, (p.z - sec.zo) / (sec.rz * sec.rz));
+      if (N.lengthSq() < 1e-9) N.set(0, 0, 1);
+      N.normalize();
+      B.crossVectors(N, T).normalize();
+      N.crossVectors(T, B).normalize();
+      mesh.setMatrixAt(n, m4.makeBasis(T, B, N).setPosition(p).multiply(sc));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    group.add(mesh);
+  });
+  return { mesh: group, drop };
+}
+
+/* ---------- Scene ---------- */
+const canvas = document.getElementById('view'), stage = document.getElementById('stage');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+catch (e) { document.getElementById('fail').style.display = 'flex'; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 500);
+camera.position.set(0, 26, 140);
+
+const bust = new THREE.Mesh(bustGeometry(), new THREE.MeshPhysicalMaterial({ color: 0x17171a, roughness: 0.8, metalness: 0, sheen: 1, sheenRoughness: 0.5, sheenColor: 0x6a655c, envMapIntensity: 0.6 }));
+bust.receiveShadow = true;
+const stand = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 7, 48), new THREE.MeshStandardMaterial({ color: 0x0d0d0f, roughness: 0.6, metalness: 0.2 }));
+stand.position.set(0, -3.5, 0.6);
+const foot = new THREE.Mesh(new THREE.CylinderGeometry(11, 11.6, 1.1, 72), new THREE.MeshStandardMaterial({ color: 0xe0b055, metalness: 1, roughness: 0.26 }));
+foot.position.set(0, -7.5, 0.6);
+const rig = new THREE.Group();
+rig.add(bust, stand, foot);
+scene.add(rig);
+
+const key = new THREE.DirectionalLight(0xfff1d6, 2.4);
+key.position.set(28, 62, 70);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -24; key.shadow.camera.right = 24; key.shadow.camera.top = 40; key.shadow.camera.bottom = -8;
+key.shadow.camera.near = 10; key.shadow.camera.far = 200;
+key.shadow.bias = -0.0006; key.shadow.normalBias = 0.05;
+const rim = new THREE.DirectionalLight(0xd9b25a, 1.6);
+rim.position.set(-50, 40, -60);
+scene.add(key, rim, new THREE.AmbientLight(0xffffff, 0.12));
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 22, 0);
+controls.enablePan = false;
+controls.enableDamping = true;
+controls.minDistance = 46; controls.maxDistance = 170;
+controls.minPolarAngle = Math.PI * 0.32; controls.maxPolarAngle = Math.PI * 0.6;
+controls.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+controls.autoRotateSpeed = 1.1;
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+
+/* ---------- Controls ---------- */
+const pick = { style: 'cuban', width: 6, length: 20 };
+let worn = [];
+const MAX = 3;
+const $ = (id) => document.getElementById(id);
+function options(el, items, current, onPick) {
+  el.replaceChildren(...items.map(([value, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = label;
+    b.setAttribute('aria-pressed', String(value === current));
+    b.addEventListener('click', () => onPick(value));
+    return b;
+  }));
+}
+function drawPickers() {
+  options($('o-style'), Object.entries(STYLES).map(([k, v]) => [k, v.label]), pick.style, (v) => { pick.style = v; pick.width = STYLES[v].widths[1]; drawPickers(); });
+  options($('o-width'), STYLES[pick.style].widths.map((w) => [w, w + ' mm']), pick.width, (v) => { pick.width = v; drawPickers(); });
+  options($('o-length'), LENGTHS.map((l) => [l, l + ' in']), pick.length, (v) => { pick.length = v; drawPickers(); });
+}
+function drawWorn() {
+  $('worn').replaceChildren(...worn.map((c) => {
+    const li = document.createElement('li'), t = document.createElement('span'), b = document.createElement('button');
+    t.textContent = STYLES[c.spec.style].label + ' · ' + c.spec.width + ' mm · ' + c.spec.length + ' in';
+    b.type = 'button'; b.textContent = 'Remove';
+    b.setAttribute('aria-label', 'Remove ' + t.textContent);
+    b.addEventListener('click', () => removeChain(c));
+    li.append(t, b);
+    return li;
+  }));
+  $('empty').hidden = worn.length > 0;
+  $('add').disabled = worn.length >= MAX;
+  $('add').textContent = worn.length >= MAX ? 'Three chains on' : 'Add chain';
+}
+function addChain(spec) {
+  if (worn.length >= MAX) return;
+  const slot = [0, 1, 2].find((s) => !worn.some((c) => c.slot === s));
+  const built = buildChain(spec, slot);
+  rig.add(built.mesh);
+  worn.push({ spec: { ...spec }, slot, mesh: built.mesh });
+  drawWorn();
+}
+function removeChain(c) {
+  rig.remove(c.mesh); c.mesh.children.forEach((m) => m.dispose());
+  worn = worn.filter((x) => x !== c);
+  drawWorn();
+}
+$('add').addEventListener('click', () => addChain(pick));
+$('spin').addEventListener('click', () => {
+  controls.autoRotate = !controls.autoRotate;
+  $('spin').setAttribute('aria-pressed', String(!controls.autoRotate));
+  $('spin').textContent = controls.autoRotate ? 'Pause rotation' : 'Resume rotation';
+});
+if (!controls.autoRotate) { $('spin').setAttribute('aria-pressed', 'true'); $('spin').textContent = 'Resume rotation'; }
+
+// neck size of this bust, so the stated scale is true
+let neck = 0;
+for (let i = 0; i < 360; i++) {
+  const a = surface(28.5, (i / 360) * Math.PI * 2), b = surface(28.5, ((i + 1) / 360) * Math.PI * 2);
+  neck += Math.hypot(a[0] - b[0], a[2] - b[2]);
+}
+$('note').textContent = 'True to scale: lengths are laid out on a ' + (neck / 2.54).toFixed(1) + ' in neck.';
+
+drawPickers();
+addChain({ style: 'cuban', width: 6, length: 20 });
+window.__ready = true;
+</script>
+</body>
+</html>
